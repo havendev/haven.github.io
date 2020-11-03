@@ -830,6 +830,185 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="/2020/08/24/TCP与UDP的一些理解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="海文">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haven's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/24/TCP与UDP的一些理解/" itemprop="url">TCP与UDP的一些理解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-08-24T16:54:15+08:00">
+                2020-08-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/底层/" itemprop="url" rel="index">
+                    <span itemprop="name">底层</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h2><p>TCP 是<strong>面向连接</strong>的、<strong>可靠</strong>的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。</p>
+<p>TCP是面向<strong>面向字节流</strong>，虽然应用程序和TCP的交互是一次一个数据块（大小不等），但TCP把应用程序看成是一连串的无结构的字节流。TCP有一个缓冲，当应用程序传送的数据块太长，TCP就可以把它划分短一些再传送。</p>
+<p>TCP 为提供可靠性传输，实行“<strong>顺序控制</strong>”或“<strong>重发控制</strong>”机制。此外还具备“<strong>**</strong>流控制（流量控制）拥塞控制”<em>**</em>、提高网络利用率等众多功能。</p>
+<p>TCP有以下特点：</p>
+<ul>
+<li>TCP充分地实现了数据传输时各种控制功能，可以进行丢包时的重发控制，还可以对次序乱掉的分包进行顺序控制。而这些在 UDP 中都没有。</li>
+<li>此外，TCP 作为一种面向有连接的协议，只有在确认通信对端存在时才会发送数据，从而可以控制通信流量的浪费。</li>
+<li>根据 TCP 的这些机制，在 IP 这种无连接的网络上也能够实现高可靠性的通信（ <strong>主要通过检验和、序列号、确认应答、重发控制、连接管理以及窗口控制</strong>等机制实现）。</li>
+</ul>
+<h2 id="3次握手过程详解"><a href="#3次握手过程详解" class="headerlink" title="3次握手过程详解"></a>3次握手过程详解</h2><p>（1）第一次握手： Client将标志位SYN置为1，随机产生一个值seq=J，并将该数据包发送给Server，Client进入SYN_SENT状态，等待Server确认。  （2）第二次握手： Server收到数据包后由标志位SYN=1知道Client请求建立连接，Server将标志位SYN和ACK都置为1，ack=J+1，随机产生一个值seq=K，并将该数据包发送给Client以确认连接请求，Server进入SYN_RCVD状态。  （3）第三次握手： Client收到确认后，检查ack是否为J+1，ACK是否为1，如果正确则将标志位ACK置为1，ack=K+1，并将该数据包发送给Server，Server检查ack是否为K+1，ACK是否为1，如果正确则连接建立成功，Client和Server进入ESTABLISHED状态，完成三次握手，随后Client与Server之间可以开始传输数据了。</p>
+<h2 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h2><p>UDP 是<strong>面向报文</strong>的，所谓面向报文，是指面向报文的传输方式是应用层交给UDP多长的报文，UDP就照样发送，即一次发送一个报文。因此，应用程序必须选择合适大小的报文。若报文太长，则IP层需要分片，降低效率。若太短，会是IP太小。</p>
+<p>UDP 是不<strong>具有可靠性</strong>的数据报协议，细微的处理它会交给上层的应用去完成。在 UDP 的情况下，虽然可以确保发送消息的大小，却不能保证消息一定会到达。因此，应用有时会根据自己的需要进行重发处理。</p>
+<p>UDP有以下特点：</p>
+<ul>
+<li><p>UDP 不提供复杂的控制机制，利用 IP 提供面向无连接的通信服务。</p>
+</li>
+<li><p>传输途中出现丢包，UDP 也不负责重发。</p>
+</li>
+<li><p>当包的到达顺序出现乱序时，UDP没有纠正的功能。</p>
+</li>
+<li><p>并且它是将应用程序发来的数据在收到的那一刻，立即按照原样发送到网络上的一种机制。即使是出现网络拥堵的情况，UDP 也无法进行流量控制等避免网络拥塞行为。</p>
+</li>
+<li><p>如果需要以上的细节控制，不得不交由采用 UDP 的应用程序去处理。</p>
+</li>
+<li><p>UDP 常用于以下几个方面：</p>
+<p>1.包总量较少的通信（DNS、SNMP等）；</p>
+<p>2.视频、音频等多媒体通信（即时通信）；</p>
+<p>3.限定于 LAN 等特定网络中的应用通信；</p>
+<p>4.广播通信（广播、多播）。</p>
+</li>
+</ul>
+<h2 id="UDP-和-TCP-的应用"><a href="#UDP-和-TCP-的应用" class="headerlink" title="UDP 和 TCP 的应用"></a>UDP 和 TCP 的应用</h2><p><img src="../img/UDP与TCP的应用.png" alt="image-20200824172103933"></p>
+<h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><p>TCP 和 UDP 的优缺点无法简单地、绝对地去做比较：TCP 用于在传输层有必要实现可靠传输的情况；</p>
+<p>而在一方面，UDP 主要用于那些对高速传输和实时性有较高要求的通信或广播通信。TCP 和 UDP 应该根据应用的目的按需使用。</p>
+<p>参考文献：</p>
+<p><a href="https://segmentfault.com/a/1190000021815671" target="_blank" rel="noopener">面试官：说说UDP和TCP的区别及应用场景</a></p>
+<p><a href="https://www.cnblogs.com/imteck4713/p/11777310.html" target="_blank" rel="noopener">一泡尿的时间，快速读懂QUIC协议</a></p>
+<p><a href="http://www.52im.net/thread-258-1-1.html" target="_blank" rel="noopener">理论经典：TCP协议的3次握手与4次挥手过程详解</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="/2020/08/21/frame与bounds的一些理解/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1814,7 +1993,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1825,7 +2004,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>

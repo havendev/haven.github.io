@@ -79,21 +79,20 @@
 
 
 
-<meta name="description" content="TCPTCP 是面向连接的、可靠的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。 TCP是面向面向字节流，虽然应用程序和TCP的交互是一次一个数据块（大小不等），但TCP把应用程序看成是一连串的无结构的字节流。TCP有一个缓冲，当应用程序传送的数据块太长，TCP就可以把它划分短一些再传送。 TCP 为提供">
+<meta name="description" content="TCPTCP 是面向连接的、可靠的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。 TCP是面向面向字节流，虽然应用程序和TCP的交互是一次一个数据块（大小不等），但TCP把应用程序看成是一连串的无结构的字节流。TCP有一个缓冲，当应用程序传送的数据块太长，TCP就可以把它划分短一些再传送。 TCP 为提供可">
 <meta name="keywords" content="底层知识点">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TCP与UDP的一些理解">
 <meta property="og:url" content="/2020/08/24/TCP与UDP的一些理解/index.html">
 <meta property="og:site_name" content="Haven&#39;s Blog">
-<meta property="og:description" content="TCPTCP 是面向连接的、可靠的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。 TCP是面向面向字节流，虽然应用程序和TCP的交互是一次一个数据块（大小不等），但TCP把应用程序看成是一连串的无结构的字节流。TCP有一个缓冲，当应用程序传送的数据块太长，TCP就可以把它划分短一些再传送。 TCP 为提供">
+<meta property="og:description" content="TCPTCP 是面向连接的、可靠的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。 TCP是面向面向字节流，虽然应用程序和TCP的交互是一次一个数据块（大小不等），但TCP把应用程序看成是一连串的无结构的字节流。TCP有一个缓冲，当应用程序传送的数据块太长，TCP就可以把它划分短一些再传送。 TCP 为提供可">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="/2020/08/24/TCP与UDP的一些理解/是">
-<meta property="og:image" content="/var/folders/sd/1syvrczd63nb9hqk_m0kp8f00000gn/T/abnerworks.Typora/image-20200824172524927.png">
-<meta property="og:updated_time" content="2020-11-02T09:27:50.427Z">
+<meta property="og:image" content="/2020/08/24/img/UDP与TCP的应用.png">
+<meta property="og:updated_time" content="2020-11-03T03:25:41.291Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP与UDP的一些理解">
-<meta name="twitter:description" content="TCPTCP 是面向连接的、可靠的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。 TCP是面向面向字节流，虽然应用程序和TCP的交互是一次一个数据块（大小不等），但TCP把应用程序看成是一连串的无结构的字节流。TCP有一个缓冲，当应用程序传送的数据块太长，TCP就可以把它划分短一些再传送。 TCP 为提供">
-<meta name="twitter:image" content="/2020/08/24/TCP与UDP的一些理解/是">
+<meta name="twitter:description" content="TCPTCP 是面向连接的、可靠的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。 TCP是面向面向字节流，虽然应用程序和TCP的交互是一次一个数据块（大小不等），但TCP把应用程序看成是一连串的无结构的字节流。TCP有一个缓冲，当应用程序传送的数据块太长，TCP就可以把它划分短一些再传送。 TCP 为提供可">
+<meta name="twitter:image" content="/2020/08/24/img/UDP与TCP的应用.png">
 
 
 
@@ -345,8 +344,7 @@
       
 
       
-        <p><img src="是" alt="image-20200824172103933"></p>
-<h2 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h2><p>TCP 是<strong>面向连接</strong>的、<strong>可靠</strong>的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。</p>
+        <h2 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h2><p>TCP 是<strong>面向连接</strong>的、<strong>可靠</strong>的流协议。流就是指不间断的数据结构，当应用程序采用 TCP 发送消息时，虽然可以保证发送的顺序，但还是犹如没有任何间隔的数据流发送给接收端。</p>
 <p>TCP是面向<strong>面向字节流</strong>，虽然应用程序和TCP的交互是一次一个数据块（大小不等），但TCP把应用程序看成是一连串的无结构的字节流。TCP有一个缓冲，当应用程序传送的数据块太长，TCP就可以把它划分短一些再传送。</p>
 <p>TCP 为提供可靠性传输，实行“<strong>顺序控制</strong>”或“<strong>重发控制</strong>”机制。此外还具备“<strong>**</strong>流控制（流量控制）拥塞控制”<em>**</em>、提高网络利用率等众多功能。</p>
 <p>TCP有以下特点：</p>
@@ -377,7 +375,7 @@
 <p>4.广播通信（广播、多播）。</p>
 </li>
 </ul>
-<h2 id="UDP-和-TCP-的应用"><a href="#UDP-和-TCP-的应用" class="headerlink" title="UDP 和 TCP 的应用"></a>UDP 和 TCP 的应用</h2><p><img src="/var/folders/sd/1syvrczd63nb9hqk_m0kp8f00000gn/T/abnerworks.Typora/image-20200824172524927.png" alt="image-20200824172524927"></p>
+<h2 id="UDP-和-TCP-的应用"><a href="#UDP-和-TCP-的应用" class="headerlink" title="UDP 和 TCP 的应用"></a>UDP 和 TCP 的应用</h2><p><img src="../img/UDP与TCP的应用.png" alt="image-20200824172103933"></p>
 <h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><p>TCP 和 UDP 的优缺点无法简单地、绝对地去做比较：TCP 用于在传输层有必要实现可靠传输的情况；</p>
 <p>而在一方面，UDP 主要用于那些对高速传输和实时性有较高要求的通信或广播通信。TCP 和 UDP 应该根据应用的目的按需使用。</p>
 <p>参考文献：</p>
@@ -414,8 +412,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/08/24/UDP与TCP的一些理解/" rel="next" title>
-                <i class="fa fa-chevron-left"></i> 
+              <a href="/2020/08/21/frame与bounds的一些理解/" rel="next" title="frame与bounds的一些理解">
+                <i class="fa fa-chevron-left"></i> frame与bounds的一些理解
               </a>
             
           </div>
@@ -503,7 +501,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

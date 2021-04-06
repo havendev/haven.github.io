@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS进阶,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言埋点统计在产品运营过程中对用户行为分析、产品前期的业务模式探索起着很重要的作用。常用的三种埋点方式主要包括手动埋点、可视化埋点和无痕埋点。  手动埋点主要是通过手写代码的方式哪里需要埋哪里，优点是数据精准、方便调试、能够自定义所需的变量值，缺点是工作量较大、埋点代码多容易产生冗余、后期难维护等； 可视化埋点指前端或者APP端基于DOM元素和控件所精准自动埋点的上报的方案，优点是相比较于无埋点相">
+<meta name="keywords" content="iOS进阶">
+<meta property="og:type" content="article">
+<meta property="og:title" content="无侵入的埋点方案">
+<meta property="og:url" content="/2019/06/05/无侵入的埋点方案/index.html">
+<meta property="og:site_name" content="Haven&#39;s Blog">
+<meta property="og:description" content="前言埋点统计在产品运营过程中对用户行为分析、产品前期的业务模式探索起着很重要的作用。常用的三种埋点方式主要包括手动埋点、可视化埋点和无痕埋点。  手动埋点主要是通过手写代码的方式哪里需要埋哪里，优点是数据精准、方便调试、能够自定义所需的变量值，缺点是工作量较大、埋点代码多容易产生冗余、后期难维护等； 可视化埋点指前端或者APP端基于DOM元素和控件所精准自动埋点的上报的方案，优点是相比较于无埋点相">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2020-08-25T09:58:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="无侵入的埋点方案">
+<meta name="twitter:description" content="前言埋点统计在产品运营过程中对用户行为分析、产品前期的业务模式探索起着很重要的作用。常用的三种埋点方式主要包括手动埋点、可视化埋点和无痕埋点。  手动埋点主要是通过手写代码的方式哪里需要埋哪里，优点是数据精准、方便调试、能够自定义所需的变量值，缺点是工作量较大、埋点代码多容易产生冗余、后期难维护等； 可视化埋点指前端或者APP端基于DOM元素和控件所精准自动埋点的上报的方案，优点是相比较于无埋点相">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="/2019/06/05/无侵入的埋点方案/">
+
+
+
+
+
+  <title>无侵入的埋点方案 | Haven's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Haven's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="/2019/06/05/无侵入的埋点方案/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="海文">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haven's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">无侵入的埋点方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-05T10:17:14+08:00">
+                2019-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>埋点统计在产品运营过程中对用户行为分析、产品前期的业务模式探索起着很重要的作用。常用的三种埋点方式主要包括手动埋点、可视化埋点和无痕埋点。</p>
+<ul>
+<li>手动埋点主要是通过手写代码的方式哪里需要埋哪里，优点是数据精准、方便调试、能够自定义所需的变量值，缺点是工作量较大、埋点代码多容易产生冗余、后期难维护等；</li>
+<li>可视化埋点指前端或者APP端基于DOM元素和控件所精准自动埋点的上报的方案，优点是相比较于无埋点相而言对较低，但是这个可视化元素的识别技术是客户端或者前端所要实现的，唯一 ID 生成也无需客户端去自定义规则，这套生成规则由相关产品在自动化工具的情况下生成配置表，下发到客户端，再由客户端按坑就班到相关界面去实现、数据量相对精确。缺点是可视化工具的平台的搭建，静态页面的元素识别都需要额外开发、动态效果可能会遗漏。（可参考：<a href="https://kyson.cn/index.php/archives/146/" target="_blank" rel="noopener">可视化埋点(2)：iOS端实现</a>）</li>
+<li>无痕埋点指的是通过编译工具、预编译替换代码等，直接由SDK全部负责采集上报，优点是代码不会出现在业务代码中、容易管理和维护，缺点是后期的结息比较复杂、view_path不能做到100%唯一、后端或产品人员数据分析工作量大。</li>
+</ul>
+<p>三种埋点方案中，可视化埋点和无痕埋点，都属于无侵入的埋点方案，因为它们都不需要在业务代码中写入埋点代码。采用无侵入埋点方案，既可以做到埋点被统一维护，又可以实现和工程代码的解耦。其中无痕埋点方案能够满足大多数应用的埋点需求。</p>
+<h1 id="无痕埋点方案介绍"><a href="#无痕埋点方案介绍" class="headerlink" title="无痕埋点方案介绍"></a>无痕埋点方案介绍</h1><p>最常见的三种埋点类型有页面进入次数、页面停留时间、点击事件。对于这三种常见的情况，我们都可以通过runtime的method swizzling来插入埋点代码，以实现无侵入的埋点方法，可分三步来处理：实现替换、生成唯一标识、数据上报。</p>
+<p>新建一个方法替换类NSObject+Logger，加上替换的方法swizzleSelectorFromSelector : toSelector :，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">+ (void)swizzleSelectorFromSelector:(SEL)originalSelector toSelector:(SEL)swizzledSelector &#123;</span><br><span class="line">    Method originalMethod = class_getInstanceMethod(self, originalSelector);</span><br><span class="line">    Method swizzledMethod = class_getInstanceMethod(self, swizzledSelector);</span><br><span class="line">    </span><br><span class="line">    BOOL didAddMethod =</span><br><span class="line">    class_addMethod(self,</span><br><span class="line">                    originalSelector,</span><br><span class="line">                    method_getImplementation(swizzledMethod),</span><br><span class="line">                    method_getTypeEncoding(swizzledMethod));</span><br><span class="line">    </span><br><span class="line">    if (didAddMethod) &#123;</span><br><span class="line">        class_replaceMethod(self,</span><br><span class="line">                            swizzledSelector,</span><br><span class="line">                            method_getImplementation(originalMethod),</span><br><span class="line">                            method_getTypeEncoding(originalMethod));</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        method_exchangeImplementations(originalMethod, swizzledMethod);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法利用运行时method_exchangeImplementations接口将方法的实现进行了交换，原方法调用时就会被hook住，从而去执行指定的方法。</p>
+<h2 id="页面进入次数、页面停留时间事件"><a href="#页面进入次数、页面停留时间事件" class="headerlink" title="页面进入次数、页面停留时间事件"></a>页面进入次数、页面停留时间事件</h2><p>页面进入次数、页面停留时间需要对UIViewController生命周期进行埋点，可以创建一个UIViewController的Category，通过NSObject+Logger将原生方法替换，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">+ (void)load &#123;</span><br><span class="line">    static dispatch_once_t onceToken;</span><br><span class="line">    dispatch_once(&amp;onceToken, ^&#123;</span><br><span class="line">        Class class = NSClassFromString(@&quot;UIViewController&quot;);</span><br><span class="line">        [class swizzleSelectorFromSelector:@selector(viewWillAppear:) toSelector:@selector(hook_viewWillAppear:)];</span><br><span class="line">        [class swizzleSelectorFromSelector:@selector(viewWillDisappear:) toSelector:@selector(hook_viewWillDisappear:)];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)hook_viewWillAppear:(BOOL)animated &#123;</span><br><span class="line">    //先执行插入代码，再执行原 viewWillAppear 方法</span><br><span class="line">    [self insertToViewWillAppear];</span><br><span class="line">    </span><br><span class="line">    [self hook_viewWillAppear:animated];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)hook_viewWillDisappear:(BOOL)animated &#123;</span><br><span class="line">    //先执行插入代码，再执行原 viewWillDisappear 方法</span><br><span class="line">    [self insertToViewWillDisappear];</span><br><span class="line">    </span><br><span class="line">    [self hook_viewWillDisappear:animated];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>数据上报部分这里没有做具体介绍，可以自行对接自己的后端接口或者一些第三方平台，如友盟。</p>
+<h2 id="点击事件"><a href="#点击事件" class="headerlink" title="点击事件"></a>点击事件</h2><p>常用的控件如UIButton、UITextField、UISwitch、UISegmentedControl、UISlider 等，它们的父类都是UIControl ，我们可对sendAction:to:forEvent: 进行拦截，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">+ (void) load &#123;</span><br><span class="line">    static dispatch_once_t onceToken;</span><br><span class="line">    dispatch_once(&amp;onceToken, ^&#123;</span><br><span class="line">        //可监听到UIButton、UITextField、UISwitch、UISegmentedControl、UISlider 、UIStepper等控件的Action事件</span><br><span class="line">        [self swizzleSelectorFromSelector:@selector(sendAction:to:forEvent:) toSelector:@selector(hook_sendAction:to:forEvent:)];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#pragma mark--</span><br><span class="line">#pragma 按钮点击</span><br><span class="line">- (void)hook_sendAction:(SEL)action to:(id)target forEvent:(UIEvent *)event &#123;</span><br><span class="line">    [self insertToSendAction:action to:target forEvent:event];</span><br><span class="line">    </span><br><span class="line">    [self hook_sendAction:action to:target forEvent:event];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)insertToSendAction:(SEL)action to:(id)target forEvent:(UIEvent *)event &#123;</span><br><span class="line">    //日志记录</span><br><span class="line">    if ([[[event allTouches] anyObject] phase] == UITouchPhaseEnded) &#123;</span><br><span class="line">        NSString *actionString = NSStringFromSelector(action);</span><br><span class="line">        NSString *targetString = NSStringFromClass([target class]);</span><br><span class="line">        </span><br><span class="line">        NSLog(@&quot;唯一标识：%@_%@_%@&quot;, targetString, self.accessibilityIdentifier, actionString);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="唯一标识"><a href="#唯一标识" class="headerlink" title="唯一标识"></a>唯一标识</h2><p>这里的唯一标识组成规则是NSStringFromClass([target class])+self.accessibilityIdentifier，accessibilityIdentifier+NSStringFromSelector(action)，accessibilityIdentifier系统默认为nil，我们需要根据不同控件的特性为accessibilityIdentifier进行赋值，如UIButton控件的accessibilityIdentifier可以是控件的变量名，考虑到用XIB或SB布局不一定会定义变量，可取button的title值或者image的名字来定义，新建一个UIView+Logger类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">@implementation UIView (Logger)</span><br><span class="line"></span><br><span class="line">+ (void)load &#123;</span><br><span class="line">    static dispatch_once_t onceToken;</span><br><span class="line">    dispatch_once(&amp;onceToken, ^&#123;        </span><br><span class="line">        Class class = NSClassFromString(@&quot;UIView&quot;);</span><br><span class="line">        [class swizzleSelectorFromSelector:@selector(accessibilityIdentifier) toSelector:@selector(hook_accessibilityIdentifier)];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#pragma mark - Method Swizzling</span><br><span class="line">- (NSString *)hook_accessibilityIdentifier &#123;</span><br><span class="line">    NSString *labelStr = [self.superview findNameWithInstance:self];</span><br><span class="line">    </span><br><span class="line">    if (labelStr &amp;&amp; ![labelStr isEqualToString:@&quot;&quot;]) &#123;</span><br><span class="line">        //SB或XIB布局的，因获取不到image的name，所以至少要拉个变量名</span><br><span class="line">        labelStr = [NSString stringWithFormat:@&quot;%@&quot;,labelStr];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if ([self isKindOfClass:[UIButton class]]) &#123;</span><br><span class="line">            //UIButton 使用 button 的 text 和 image</span><br><span class="line">            labelStr = [NSString stringWithFormat:@&quot;%@%@&quot;,((UIButton *)self).titleLabel.text?:@&quot;&quot;,((UIButton *)self).imageView.image.accessibilityIdentifier?:@&quot;&quot;];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    [self setAccessibilityIdentifier:labelStr];</span><br><span class="line">    return labelStr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>findNameWithInstance:的实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">- (NSString *)findNameWithInstance:(UIView *)instance</span><br><span class="line">&#123;</span><br><span class="line">    id nextResponder = [self nextResponder];</span><br><span class="line">    NSString *name = [RuntimeHelper nameWithClass:self instance:instance];</span><br><span class="line">    if (!name) &#123;</span><br><span class="line">        return [nextResponder findNameWithInstance:instance];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if ([name hasPrefix:@&quot;_&quot;]) &#123;  //去掉变量名的下划线前缀</span><br><span class="line">        name = [name substringFromIndex:1];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里又延伸出了一个问题，UIImage 并没有提供获取资源名字的方法。解决问题的方式是通过替换 UIImage 的 imageNamed: 方法对 UIImage的accessibilityIdentifier 进行赋值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@implementation UIImage (Logger)</span><br><span class="line">+ (void)load &#123;</span><br><span class="line">    static dispatch_once_t onceToken;</span><br><span class="line">    dispatch_once(&amp;onceToken, ^&#123;        </span><br><span class="line">        Class imageClass = NSClassFromString(@&quot;UIImage&quot;);</span><br><span class="line">        [object_getClass(imageClass) swizzleSelectorFromSelector:@selector(imageNamed:) toSelector:@selector(hook_imageNamed:)];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (UIImage *)hook_imageNamed:(NSString *)imageName &#123;</span><br><span class="line">    UIImage *image = [UIImage hook_imageNamed:imageName];</span><br><span class="line">    image.accessibilityIdentifier = imageName;</span><br><span class="line">    return image;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Delegate事件"><a href="#Delegate事件" class="headerlink" title="Delegate事件"></a>Delegate事件</h2><p>Delegate 事件的 swizzling 需要分成两步，第一步先替换掉 setDelegate:  ，其次是对 Delegate 事件的替换，举个 UIScrollView 的例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">//我们要保证在每个控制器里都执行一次，所以替换的方法都会加上class name的前缀，以示区别</span><br><span class="line">#define GET_CLASS_CUSTOM_SEL(sel,class)  NSSelectorFromString([NSString stringWithFormat:@&quot;%@_%@&quot;,NSStringFromClass(class),NSStringFromSelector(sel)])</span><br><span class="line"></span><br><span class="line">@implementation UIScrollView (Logger)</span><br><span class="line">+ (void)load &#123;</span><br><span class="line">    static dispatch_once_t onceToken;</span><br><span class="line">    dispatch_once(&amp;onceToken, ^&#123;</span><br><span class="line">        [[self class] swizzleSelectorFromSelector:@selector(setDelegate:) toSelector:@selector(hook_setDelegate:)];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)hook_setDelegate:(id&lt;UIScrollViewDelegate&gt;)delegate &#123;</span><br><span class="line">    // 由于setDelegate方法可能被多次调用，所以要判断是否已经swizzling了，防止重复执行。</span><br><span class="line">    if (![[self class] delegate:delegate isContain:@selector(scrollViewWillBeginDragging:)]) &#123;</span><br><span class="line">        [self hook_scrollViewWillBeginDragging:delegate];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    if ([NSStringFromClass([self class]) isEqualToString:@&quot;UITableView&quot;])&#123;</span><br><span class="line">        if (![[self class] delegate:delegate isContain:@selector(tableView:didSelectRowAtIndexPath:)]) &#123;</span><br><span class="line">            [(UITableView *)self hook_tableViewDidSelectRowAtIndexPathInClass:delegate];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    [self hook_setDelegate:delegate];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#pragma --</span><br><span class="line">#pragma UIScrollViewDelegate</span><br><span class="line">- (void)hook_scrollViewWillBeginDragging:(id&lt;UIScrollViewDelegate&gt;)delegate &#123;</span><br><span class="line">    [[self class] swizzleDelegate:delegate originSelector:@selector(scrollViewWillBeginDragging:) swizzleSelector:@selector(insertToScrollViewWillBeginDragging:)];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)insertToScrollViewWillBeginDragging:(UIScrollView *)scrollView &#123;</span><br><span class="line">    SEL sel = GET_CLASS_CUSTOM_SEL(@selector(scrollViewWillBeginDragging:),[self class]);</span><br><span class="line">    if ([self respondsToSelector:sel]) &#123;</span><br><span class="line">        IMP imp = [self methodForSelector:sel];</span><br><span class="line">        void (*func)(id, SEL,id) = (void *)imp;</span><br><span class="line">        </span><br><span class="line">        NSLog(@&quot;标识：%@_%@_%@&quot;, NSStringFromClass([self class]), [RuntimeHelper nameWithClass:self instance:scrollView], NSStringFromSelector(@selector(scrollViewWillBeginDragging:)));</span><br><span class="line">        </span><br><span class="line">        func(self, sel, scrollView);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>NSObject+Logger类新增 delegate: isContain: 和 swizzleDelegate: originSelector: swizzleSelector: 两个方法，完整代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">#define GET_CLASS_CUSTOM_SEL(sel,class)  NSSelectorFromString([NSString stringWithFormat:@&quot;%@_%@&quot;,NSStringFromClass(class),NSStringFromSelector(sel)])</span><br><span class="line"></span><br><span class="line">@implementation NSObject (Logger)</span><br><span class="line">+ (void)swizzleSelectorFromSelector:(SEL)originalSelector toSelector:(SEL)swizzledSelector &#123;</span><br><span class="line">    Method originalMethod = class_getInstanceMethod(self, originalSelector);</span><br><span class="line">    Method swizzledMethod = class_getInstanceMethod(self, swizzledSelector);</span><br><span class="line"></span><br><span class="line">//    NSLog(@&quot;__delegateObject %@&quot;, [self class]);</span><br><span class="line"></span><br><span class="line">    BOOL didAddMethod =</span><br><span class="line">    class_addMethod(self,</span><br><span class="line">                    originalSelector,</span><br><span class="line">                    method_getImplementation(swizzledMethod),</span><br><span class="line">                    method_getTypeEncoding(swizzledMethod));</span><br><span class="line"></span><br><span class="line">    if (didAddMethod) &#123;</span><br><span class="line">        class_replaceMethod(self,</span><br><span class="line">                            swizzledSelector,</span><br><span class="line">                            method_getImplementation(originalMethod),</span><br><span class="line">                            method_getTypeEncoding(originalMethod));</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        method_exchangeImplementations(originalMethod, swizzledMethod);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (BOOL)delegate:(id)delegateObject isContain:(SEL)selector &#123;</span><br><span class="line">    return [self isContainSel:GET_CLASS_CUSTOM_SEL(selector, [delegateObject class]) inClass:[delegateObject class]];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (void)swizzleDelegate:(id)delegateObject originSelector:(SEL)originSelector swizzleSelector:(SEL)swizzleSelector &#123;</span><br><span class="line">    SEL newSelector = GET_CLASS_CUSTOM_SEL(originSelector, [delegateObject class]);</span><br><span class="line">    Method swizzledMethod = class_getInstanceMethod([delegateObject class], swizzleSelector);</span><br><span class="line">    </span><br><span class="line">    //增加swizzle delegate method</span><br><span class="line">    class_addMethod([delegateObject class],</span><br><span class="line">                    newSelector,</span><br><span class="line">                    method_getImplementation(class_getInstanceMethod([self class], swizzleSelector)),</span><br><span class="line">                    method_getTypeEncoding(swizzledMethod));</span><br><span class="line">    </span><br><span class="line">    Method swizzleDelegateMethod = class_getInstanceMethod([delegateObject class], newSelector);</span><br><span class="line">    Method originDelegateMethod = class_getInstanceMethod([delegateObject class], originSelector);</span><br><span class="line">    </span><br><span class="line">    // 将swizzle delegate method 和 origin delegate method 交换</span><br><span class="line">    method_exchangeImplementations(swizzleDelegateMethod, originDelegateMethod);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (BOOL)isContainSel:(SEL)sel inClass:(Class)class &#123;</span><br><span class="line">    unsigned int count;</span><br><span class="line">    </span><br><span class="line">    Method *methodList = class_copyMethodList(class,&amp;count);</span><br><span class="line">    for (int i = 0; i &lt; count; i++) &#123;</span><br><span class="line">        Method method = methodList[i];</span><br><span class="line">        NSString *tempMethodString = [NSString stringWithUTF8String:sel_getName(method_getName(method))];</span><br><span class="line">        if ([tempMethodString isEqualToString:NSStringFromSelector(sel)]) &#123;</span><br><span class="line">            return YES;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return NO;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>数据上报的方式这里没有做过多的介绍，可通过集成第三方统计平台或自搭服务进行对接，<a href="https://github.com/havendev/AnalyticsDemo" target="_blank" rel="noopener">完整的DEMO参考这里</a>。</p>
+<h2 id="参考文献："><a href="#参考文献：" class="headerlink" title="参考文献："></a>参考文献：</h2><p><a href="https://kyson.cn/index.php/archives/145/" target="_blank" rel="noopener">可视化埋点(1)：思路</a></p>
+<p><a href="https://xietao3.com/2017/05/dataStatistics/" target="_blank" rel="noopener">iOS无埋点数据统计实践</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS进阶/" rel="tag"># iOS进阶</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/09/Mac共享ShadowSocks代理/" rel="next" title="Mac共享ShadowSocks代理">
+                <i class="fa fa-chevron-left"></i> Mac共享ShadowSocks代理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/19/千奇百怪的奔溃（一）/" rel="prev" title="千奇百怪的奔溃（一）">
+                千奇百怪的奔溃（一） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">海文</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#无痕埋点方案介绍"><span class="nav-number">2.</span> <span class="nav-text">无痕埋点方案介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#页面进入次数、页面停留时间事件"><span class="nav-number">2.1.</span> <span class="nav-text">页面进入次数、页面停留时间事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#点击事件"><span class="nav-number">2.2.</span> <span class="nav-text">点击事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#唯一标识"><span class="nav-number">2.3.</span> <span class="nav-text">唯一标识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Delegate事件"><span class="nav-number">2.4.</span> <span class="nav-text">Delegate事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文献："><span class="nav-number">2.5.</span> <span class="nav-text">参考文献：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海文</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

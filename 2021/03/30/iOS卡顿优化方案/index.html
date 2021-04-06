@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS进阶,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="造成卡顿的原因 死锁  抢锁  大量的Ui绘制,复杂的UI，图文混排  主线程大量IO、大量计算   RunLoop 运行时从 RunLoop 运行逻辑中，不难发现 NSRunLoop 调用方法主要在于两个状态区间：  kCFRunLoopBeforeSources 和 kCFRunLoopBeforeWaiting 之间 kCFRunLoopAfterWaiting 之后  如果这两个时间内耗时">
+<meta name="keywords" content="iOS进阶">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS性能优化-卡顿优化方案">
+<meta property="og:url" content="/2021/03/30/iOS卡顿优化方案/index.html">
+<meta property="og:site_name" content="Haven&#39;s Blog">
+<meta property="og:description" content="造成卡顿的原因 死锁  抢锁  大量的Ui绘制,复杂的UI，图文混排  主线程大量IO、大量计算   RunLoop 运行时从 RunLoop 运行逻辑中，不难发现 NSRunLoop 调用方法主要在于两个状态区间：  kCFRunLoopBeforeSources 和 kCFRunLoopBeforeWaiting 之间 kCFRunLoopAfterWaiting 之后  如果这两个时间内耗时">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="/img/CrashReport图解说明.jpeg">
+<meta property="og:updated_time" content="2021-04-05T13:07:36.172Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS性能优化-卡顿优化方案">
+<meta name="twitter:description" content="造成卡顿的原因 死锁  抢锁  大量的Ui绘制,复杂的UI，图文混排  主线程大量IO、大量计算   RunLoop 运行时从 RunLoop 运行逻辑中，不难发现 NSRunLoop 调用方法主要在于两个状态区间：  kCFRunLoopBeforeSources 和 kCFRunLoopBeforeWaiting 之间 kCFRunLoopAfterWaiting 之后  如果这两个时间内耗时">
+<meta name="twitter:image" content="/img/CrashReport图解说明.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="/2021/03/30/iOS卡顿优化方案/">
+
+
+
+
+
+  <title>iOS性能优化-卡顿优化方案 | Haven's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Haven's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="/2021/03/30/iOS卡顿优化方案/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="海文">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haven's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS性能优化-卡顿优化方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-03-30T15:19:09+08:00">
+                2021-03-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="造成卡顿的原因"><a href="#造成卡顿的原因" class="headerlink" title="造成卡顿的原因"></a>造成卡顿的原因</h3><ul>
+<li><p><a href="https://links.jianshu.com/go?to=https%3A%2F%2Fbaike.baidu.com%2Fitem%2F%E6%AD%BB%E9%94%81%2F2196938%3Ffr%3Daladdin" target="_blank" rel="noopener">死锁</a></p>
+</li>
+<li><p>抢锁</p>
+</li>
+<li><p>大量的Ui绘制,复杂的UI，图文混排</p>
+</li>
+<li><p>主线程大量IO、大量计算</p>
+</li>
+</ul>
+<h3 id="RunLoop-运行时"><a href="#RunLoop-运行时" class="headerlink" title="RunLoop 运行时"></a>RunLoop 运行时</h3><p>从 RunLoop 运行逻辑中，不难发现 NSRunLoop 调用方法主要在于两个状态区间：</p>
+<ul>
+<li><code>kCFRunLoopBeforeSources</code> 和 <code>kCFRunLoopBeforeWaiting</code> 之间</li>
+<li><code>kCFRunLoopAfterWaiting</code> 之后</li>
+</ul>
+<p><strong>如果这两个时间内耗时太久而无法进入下一步，可以线程受阻。如果这个线程时主线程，表现出来就是出现了卡顿。</strong></p>
+<p>要监控NSRunLoop的状态,我们需要使用到CFRunLoopObserverRef,通过它可以实时获得这些状态值的变化,具体的使用如下:</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> runLoopObserverCallBack(<span class="built_in">CFRunLoopObserverRef</span> observer, <span class="built_in">CFRunLoopActivity</span> activity, <span class="keyword">void</span> *info)</span><br><span class="line">&#123;</span><br><span class="line">    MyClass *object = (__bridge MyClass*)info;</span><br><span class="line">    object-&gt;activity = activity;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)registerObserver</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">CFRunLoopObserverContext</span> context = &#123;<span class="number">0</span>,(__bridge <span class="keyword">void</span>*)<span class="keyword">self</span>,<span class="literal">NULL</span>,<span class="literal">NULL</span>&#125;;</span><br><span class="line">    <span class="built_in">CFRunLoopObserverRef</span> observer = <span class="built_in">CFRunLoopObserverCreate</span>(kCFAllocatorDefault,</span><br><span class="line">                                                            kCFRunLoopAllActivities,</span><br><span class="line">                                                            <span class="literal">YES</span>,</span><br><span class="line">                                                            <span class="number">0</span>,</span><br><span class="line">                                                            &amp;runLoopObserverCallBack,</span><br><span class="line">                                                            &amp;context);</span><br><span class="line">    <span class="built_in">CFRunLoopAddObserver</span>(<span class="built_in">CFRunLoopGetMain</span>(), observer, kCFRunLoopCommonModes);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中UI主要集中在<code>__CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE0_PERFORM_FUNCTION__(source0)</code>;<br>和<code>__CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE1_PERFORM_FUNCTION__(source1)</code>;之前。<br>获取<code>kCFRunLoopBeforeSources</code>到<code>kCFRunLoopBeforeWaiting</code>再到<code>kCFRunLoopAfterWaiting</code>的状态就可以知道是否有卡顿的情况。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">实现思路：只需要另外再开启一个线程,实时计算这两个状态区域之间的耗时是否到达某个阀值,便能揪出这些性能杀手。</span><br></pre></td></tr></table></figure>
+<ul>
+<li>监听<code>runloop</code>状态变化</li>
+</ul>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 就是runloop有一个状态改变 就记录一下</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> runLoopObserverCallBack(<span class="built_in">CFRunLoopObserverRef</span> observer, <span class="built_in">CFRunLoopActivity</span> activity, <span class="keyword">void</span> *info) &#123;</span><br><span class="line">    BGPerformanceMonitor *monitor = (__bridge BGPerformanceMonitor*)info;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 记录状态值</span></span><br><span class="line">    monitor-&gt;activity = activity;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 发送信号</span></span><br><span class="line">    dispatch_semaphore_t semaphore = monitor-&gt;semaphore;</span><br><span class="line">    <span class="keyword">long</span> st = dispatch_semaphore_signal(semaphore);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"dispatch_semaphore_signal:st=%ld,time:%@"</span>,st,[BGPerformanceMonitor getCurTime]);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* Run Loop Observer Activities */</span></span><br><span class="line"><span class="comment">//    typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) &#123;</span></span><br><span class="line"><span class="comment">//        kCFRunLoopEntry = (1UL &lt;&lt; 0),    // 进入RunLoop循环(这里其实还没进入)</span></span><br><span class="line"><span class="comment">//        kCFRunLoopBeforeTimers = (1UL &lt;&lt; 1),  // RunLoop 要处理timer了</span></span><br><span class="line"><span class="comment">//        kCFRunLoopBeforeSources = (1UL &lt;&lt; 2), // RunLoop 要处理source了</span></span><br><span class="line"><span class="comment">//        kCFRunLoopBeforeWaiting = (1UL &lt;&lt; 5), // RunLoop要休眠了</span></span><br><span class="line"><span class="comment">//        kCFRunLoopAfterWaiting = (1UL &lt;&lt; 6),   // RunLoop醒了</span></span><br><span class="line"><span class="comment">//        kCFRunLoopExit = (1UL &lt;&lt; 7),           // RunLoop退出（和kCFRunLoopEntry对应）</span></span><br><span class="line"><span class="comment">//        kCFRunLoopAllActivities = 0x0FFFFFFFU</span></span><br><span class="line"><span class="comment">//    &#125;;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (activity == kCFRunLoopEntry) &#123;  <span class="comment">// 即将进入RunLoop</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"runLoopObserverCallBack - %@"</span>,<span class="string">@"kCFRunLoopEntry"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (activity == kCFRunLoopBeforeTimers) &#123;    <span class="comment">// 即将处理Timer</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"runLoopObserverCallBack - %@"</span>,<span class="string">@"kCFRunLoopBeforeTimers"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (activity == kCFRunLoopBeforeSources) &#123;   <span class="comment">// 即将处理Source</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"runLoopObserverCallBack - %@"</span>,<span class="string">@"kCFRunLoopBeforeSources"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (activity == kCFRunLoopBeforeWaiting) &#123;   <span class="comment">//即将进入休眠</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"runLoopObserverCallBack - %@"</span>,<span class="string">@"kCFRunLoopBeforeWaiting"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (activity == kCFRunLoopAfterWaiting) &#123;    <span class="comment">// 刚从休眠中唤醒</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"runLoopObserverCallBack - %@"</span>,<span class="string">@"kCFRunLoopAfterWaiting"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (activity == kCFRunLoopExit) &#123;    <span class="comment">// 即将退出RunLoop</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"runLoopObserverCallBack - %@"</span>,<span class="string">@"kCFRunLoopExit"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (activity == kCFRunLoopAllActivities) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"runLoopObserverCallBack - %@"</span>,<span class="string">@"kCFRunLoopAllActivities"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>开启 <code>runloop</code> 监听</li>
+</ul>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 开始监听</span></span><br><span class="line">- (<span class="keyword">void</span>)startMonitor &#123;</span><br><span class="line">    <span class="keyword">if</span> (observer) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建信号</span></span><br><span class="line">    semaphore = dispatch_semaphore_create(<span class="number">0</span>);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"dispatch_semaphore_create:%@"</span>,[BGPerformanceMonitor getCurTime]);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 注册RunLoop状态观察</span></span><br><span class="line">    <span class="built_in">CFRunLoopObserverContext</span> context = &#123;<span class="number">0</span>,(__bridge <span class="keyword">void</span>*)<span class="keyword">self</span>,<span class="literal">NULL</span>,<span class="literal">NULL</span>&#125;;</span><br><span class="line">    <span class="comment">//创建Run loop observer对象</span></span><br><span class="line">    <span class="comment">//第一个参数用于分配observer对象的内存</span></span><br><span class="line">    <span class="comment">//第二个参数用以设置observer所要关注的事件，详见回调函数myRunLoopObserver中注释</span></span><br><span class="line">    <span class="comment">//第三个参数用于标识该observer是在第一次进入run loop时执行还是每次进入run loop处理时均执行</span></span><br><span class="line">    <span class="comment">//第四个参数用于设置该observer的优先级</span></span><br><span class="line">    <span class="comment">//第五个参数用于设置该observer的回调函数</span></span><br><span class="line">    <span class="comment">//第六个参数用于设置该observer的运行环境</span></span><br><span class="line">    observer = <span class="built_in">CFRunLoopObserverCreate</span>(kCFAllocatorDefault,</span><br><span class="line">                                       kCFRunLoopAllActivities,</span><br><span class="line">                                       <span class="literal">YES</span>,</span><br><span class="line">                                       <span class="number">0</span>,</span><br><span class="line">                                       &amp;runLoopObserverCallBack,</span><br><span class="line">                                       &amp;context);</span><br><span class="line">    <span class="built_in">CFRunLoopAddObserver</span>(<span class="built_in">CFRunLoopGetMain</span>(), observer, kCFRunLoopCommonModes);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 在子线程监控时长</span></span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>), ^&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">YES</span>) &#123;   <span class="comment">// 有信号的话 就查询当前runloop的状态</span></span><br><span class="line">            <span class="comment">// 假定连续5次超时50ms认为卡顿(当然也包含了单次超时250ms)</span></span><br><span class="line">            <span class="comment">// 因为下面 runloop 状态改变回调方法runLoopObserverCallBack中会将信号量递增 1,所以每次 runloop 状态改变后,下面的语句都会执行一次</span></span><br><span class="line">            <span class="comment">// dispatch_semaphore_wait:Returns zero on success, or non-zero if the timeout occurred.</span></span><br><span class="line">            <span class="keyword">long</span> st = dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, <span class="number">50</span>*<span class="built_in">NSEC_PER_MSEC</span>));</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@"dispatch_semaphore_wait:st=%ld,time:%@"</span>,st,[<span class="keyword">self</span> getCurTime]);</span><br><span class="line">            <span class="keyword">if</span> (st != <span class="number">0</span>) &#123;  <span class="comment">// 信号量超时了 - 即 runloop 的状态长时间没有发生变更,长期处于某一个状态下</span></span><br><span class="line">                <span class="keyword">if</span> (!observer) &#123;</span><br><span class="line">                    timeoutCount = <span class="number">0</span>;</span><br><span class="line">                    semaphore = <span class="number">0</span>;</span><br><span class="line">                    activity = <span class="number">0</span>;</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="built_in">NSLog</span>(<span class="string">@"st = %ld,activity = %lu,timeoutCount = %d,time:%@"</span>,st,activity,timeoutCount,[<span class="keyword">self</span> getCurTime]);</span><br><span class="line">                <span class="comment">// kCFRunLoopBeforeSources - 即将处理source kCFRunLoopAfterWaiting - 刚从休眠中唤醒</span></span><br><span class="line">                <span class="comment">// 获取kCFRunLoopBeforeSources到kCFRunLoopBeforeWaiting再到kCFRunLoopAfterWaiting的状态就可以知道是否有卡顿的情况。</span></span><br><span class="line">                <span class="comment">// kCFRunLoopBeforeSources:停留在这个状态,表示在做很多事情</span></span><br><span class="line">                <span class="keyword">if</span> (activity == kCFRunLoopBeforeSources || activity == kCFRunLoopAfterWaiting) &#123;    <span class="comment">// 发生卡顿,记录卡顿次数</span></span><br><span class="line">                    <span class="keyword">if</span> (++timeoutCount &lt; <span class="number">5</span>) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;   <span class="comment">// 不足 5 次,直接 continue 当次循环,不将timeoutCount置为0</span></span><br><span class="line">                    &#125;</span><br><span class="line">                    </span><br><span class="line">                    <span class="comment">// 收集Crash信息也可用于实时获取各线程的调用堆栈</span></span><br><span class="line">                    PLCrashReporterConfig *config = [[PLCrashReporterConfig alloc] initWithSignalHandlerType:PLCrashReporterSignalHandlerTypeBSD symbolicationStrategy:PLCrashReporterSymbolicationStrategyAll];</span><br><span class="line">                    </span><br><span class="line">                    PLCrashReporter *crashReporter = [[PLCrashReporter alloc] initWithConfiguration:config];</span><br><span class="line">                    </span><br><span class="line">                    <span class="built_in">NSData</span> *data = [crashReporter generateLiveReport];</span><br><span class="line">                    PLCrashReport *reporter = [[PLCrashReport alloc] initWithData:data error:<span class="literal">NULL</span>];</span><br><span class="line">                    <span class="built_in">NSString</span> *report = [PLCrashReportTextFormatter stringValueForCrashReport:reporter withTextFormat:PLCrashReportTextFormatiOS];</span><br><span class="line">                    </span><br><span class="line">                    <span class="built_in">NSLog</span>(<span class="string">@"---------卡顿信息\n%@\n--------------"</span>,report);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@"dispatch_semaphore_wait timeoutCount = 0，time:%@"</span>,[<span class="keyword">self</span> getCurTime]);</span><br><span class="line">            timeoutCount = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="记录卡顿的函数调用"><a href="#记录卡顿的函数调用" class="headerlink" title="记录卡顿的函数调用"></a>记录卡顿的函数调用</h5><p>监控到了卡顿现场,当然下一步便是记录此时的函数调用信息,此处可以使用一个第三方Crash收集组件PLCrashReporter,它不仅可以收集Crash信息也可用于实时获取各线程的调用堆栈,使用示例如下:</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PLCrashReporterConfig *config = [[PLCrashReporterConfig alloc] initWithSignalHandlerType:PLCrashReporterSignalHandlerTypeBSD</span><br><span class="line">                                                                   symbolicationStrategy:PLCrashReporterSymbolicationStrategyAll];</span><br><span class="line">PLCrashReporter *crashReporter = [[PLCrashReporter alloc] initWithConfiguration:config];</span><br><span class="line"><span class="built_in">NSData</span> *data = [crashReporter generateLiveReport];</span><br><span class="line">PLCrashReport *reporter = [[PLCrashReport alloc] initWithData:data error:<span class="literal">NULL</span>];</span><br><span class="line"><span class="built_in">NSString</span> *report = [PLCrashReportTextFormatter stringValueForCrashReport:reporter</span><br><span class="line">                                                          withTextFormat:PLCrashReportTextFormatiOS];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@"------------\n%@\n------------"</span>, report);</span><br></pre></td></tr></table></figure>
+<p>当检测到卡顿时,抓取堆栈信息,然后在客户端做一些过滤处理,便可以上报到服务器,通过收集一定量的卡顿数据后经过分析便能准确定位需要优化的逻辑,至此这个实时卡顿监控就大功告成了!</p>
+<h5 id="测试用例"><a href="#测试用例" class="headerlink" title="测试用例"></a>测试用例</h5><p>写一个tableView视图，上下拖动，并人为设置卡顿(休眠)</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">NSInteger</span>)tableView:(<span class="built_in">UITableView</span> *)tableView numberOfRowsInSection:(<span class="built_in">NSInteger</span>)section &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">100</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">UITableViewCell</span> *)tableView:(<span class="built_in">UITableView</span> *)tableView cellForRowAtIndexPath:(<span class="built_in">NSIndexPath</span> *)indexPath &#123;</span><br><span class="line">    <span class="built_in">UITableViewCell</span> *cell = [tableView dequeueReusableCellWithIdentifier:<span class="string">@"cell"</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (!cell) &#123;</span><br><span class="line">        cell = [[<span class="built_in">UITableViewCell</span> alloc] initWithStyle:<span class="built_in">UITableViewCellStyleDefault</span> reuseIdentifier:<span class="string">@"cell"</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSString</span> *text = <span class="literal">nil</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (indexPath.row % <span class="number">10</span> == <span class="number">0</span>) &#123;  <span class="comment">// 每10行休眠0.2S</span></span><br><span class="line">        usleep(<span class="number">500</span> * <span class="number">1000</span>); <span class="comment">// 1 * 1000 * 1000 == 1秒</span></span><br><span class="line">        text = <span class="string">@"我在做复杂的事情，需要一些时间"</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        text = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@"cell - %ld"</span>,indexPath.row];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    cell.textLabel.text = text;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> cell;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>如何获取卡顿的堆栈信息</li>
+</ul>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 收集Crash信息也可用于实时获取各线程的调用堆栈</span></span><br><span class="line">PLCrashReporterConfig *config = [[PLCrashReporterConfig alloc] initWithSignalHandlerType:PLCrashReporterSignalHandlerTypeBSD symbolicationStrategy:PLCrashReporterSymbolicationStrategyAll];</span><br><span class="line"></span><br><span class="line">PLCrashReporter *crashReporter = [[PLCrashReporter alloc] initWithConfiguration:config];</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSData</span> *data = [crashReporter generateLiveReport];</span><br><span class="line">PLCrashReport *reporter = [[PLCrashReport alloc] initWithData:data error:<span class="literal">NULL</span>];</span><br><span class="line"><span class="built_in">NSString</span> *report = [PLCrashReportTextFormatter stringValueForCrashReport:reporter withTextFormat:PLCrashReportTextFormatiOS];</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@"---------卡顿信息\n%@\n--------------"</span>,report);</span><br></pre></td></tr></table></figure>
+<p>借助了一个第三方库<code>CrashReport</code>，通过该库，可以获取当前堆栈信息</p>
+<p><img src="/img/CrashReport图解说明.jpeg" alt=" CrashReport图解说明" style="zoom:50%;"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS进阶/" rel="tag"># iOS进阶</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/11/02/RxSwift笔记汇总-观察者（Observer）/" rel="next" title="RxSwift笔记汇总-观察者（Observer）">
+                <i class="fa fa-chevron-left"></i> RxSwift笔记汇总-观察者（Observer）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/03/30/RunLoop剖析/" rel="prev" title="RunLoop剖析">
+                RunLoop剖析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">海文</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#造成卡顿的原因"><span class="nav-number">1.</span> <span class="nav-text">造成卡顿的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RunLoop-运行时"><span class="nav-number">2.</span> <span class="nav-text">RunLoop 运行时</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#记录卡顿的函数调用"><span class="nav-number">2.0.1.</span> <span class="nav-text">记录卡顿的函数调用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#测试用例"><span class="nav-number">2.0.2.</span> <span class="nav-text">测试用例</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">海文</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

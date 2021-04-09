@@ -249,6 +249,166 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="/2021/04/09/CocoaPods在团队开发中的一些用法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="海文">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haven's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/04/09/CocoaPods在团队开发中的一些用法/" itemprop="url">CocoaPods在团队开发中的一些用法（一）</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-04-09T10:05:59+08:00">
+                2021-04-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工具/" itemprop="url" rel="index">
+                    <span itemprop="name">工具</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="指定第三方库版本"><a href="#指定第三方库版本" class="headerlink" title="指定第三方库版本"></a>指定第三方库版本</h3><p>在第三方库名称后面引用版本号不同的用法pod下来的版本也不同，需要注意以下几点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">target &apos;MyApp&apos; do</span><br><span class="line">	pod &apos;AFNetworking&apos;,&apos;3.2.0&apos;	//统一固定版本，适合团队开发</span><br><span class="line">	#pod &apos;AFNetworking&apos;,&apos;~&gt;3.2.0&apos;	//小版本浮动，AFNetworking 会在 3.2.0 ~ 3.9.9 之间版本浮动，不包含4.0.0</span><br><span class="line">	#pod &apos;AFNetworking&apos;	//不限制版本，任何版本都可以，不过下载的版本下来肯定是最新的</span><br><span class="line">	</span><br><span class="line">	#pod &apos;AFNetworking&apos;,:head	//使用git的HEAD指向的分支</span><br><span class="line">	#pod &apos;AFNetworking&apos;,git:&apos;https://github.com/AFNetworking/AFNetworking.git&apos;	//使用master分支</span><br><span class="line">	#pod &apos;AFNetworking&apos;, :git =&gt; &apos;https://github.com/AFNetworking/AFNetworking.git&apos;, :branch =&gt; &apos;assets&apos;	//指定branch</span><br><span class="line">	#pod &apos;AFNetworking&apos;, :git =&gt; &apos;https://github.com/gowalla/AFNetworking.git&apos;, :tag =&gt; &apos;3.2.0&apos;	//指定tag</span><br><span class="line">	#pod &apos;AFNetworking&apos;, :git =&gt; &apos;https://github.com/gowalla/AFNetworking.git&apos;, :commit =&gt; &apos;e976d63&apos;	//指定commit</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<h4 id="官网解释"><a href="#官网解释" class="headerlink" title="官网解释"></a>官网解释</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. &apos;&gt; 0.1&apos;      大于0.1版本</span><br><span class="line">2. &apos;&gt;= 0.1&apos;     大于等于0.1版本</span><br><span class="line">3. &apos;&lt; 0.1&apos;      小于0.1版本</span><br><span class="line">4. &apos;&lt;= 0.1&apos;     小于等于0.1版本</span><br><span class="line">5. &apos;~&gt; 0.1.2&apos;   大于0.1.2 小于0.2，不含0.2</span><br><span class="line">6. &apos;~&gt; 0.1&apos;     0.1以上 1.0以下,不含0.1</span><br><span class="line">7. &apos;~&gt; 0&apos;       0和以上，等于没有此约束</span><br></pre></td></tr></table></figure>
+<p>以AFNetworking库为例，执行 <code>pod install</code> 指令后，cocoapods会先去<code>~/.cocoapods/repo/master</code>路径下搜索AFNetworking的podspec文件(一个tag对应一个podspec文件)，podspec文件里有这个库的源代码地址，然后根据对应的tag下载源代码到cocoapods的缓存目录<code>~/Library/Caches/Cocoapods</code>。当我们在另一个项目再次安装AFNetworking的时候，cocopods会去<code>~/Library/Caches/Cocoapods</code>里查看有没有对应tag的源码，如果有的话就直接使用这个缓存的源码。</p>
+<h3 id="使用本地库"><a href="#使用本地库" class="headerlink" title="使用本地库"></a>使用本地库</h3><p>团队开发中可能会遇到一些比较大的第三方库，导致团队成员执行安装时网络时间成本过高，或者有时我们需要对第三方库进行二次调整的情况，这时就需要使用到本地库概念，具体方式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">target &apos;MyApp&apos; do</span><br><span class="line">	pod &apos;AFNetworking&apos;, :path =&gt; &apos;~/Documents/CocoaPodsLocalLib/AFNetworking-master&apos;</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<p>需要注意的是本地库的目录中，必须包含podspec文件，以AFNetworking为例，解压master版本后，包里就含有<code>AFNetworking.podspec</code>文件。</p>
+<p>使用本地库的方式安装的第三方库不会在<code>~/Library/Caches/Cocoapods</code>生成缓存文件。</p>
+<h3 id="多target场景"><a href="#多target场景" class="headerlink" title="多target场景"></a>多target场景</h3><h5 id="指定target的依赖库"><a href="#指定target的依赖库" class="headerlink" title="指定target的依赖库"></a>指定target的依赖库</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">target &apos;MyApp&apos; do</span><br><span class="line"> pod &apos;SDWebImage&apos;, &apos;4.0&apos;</span><br><span class="line">    target &apos;otherTaget&apos; do</span><br><span class="line">     use_frameworks!</span><br><span class="line">     pod &apos;AFNetworking&apos;,&apos;3.2.0&apos;</span><br><span class="line">    end</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<h5 id="排除target"><a href="#排除target" class="headerlink" title="排除target"></a>排除target</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">target &apos;MyApp&apos; :exclusive =&gt; true do</span><br><span class="line">  pod &apos;AFNetworking&apos;,&apos;3.2.0&apos;</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<h5 id="指定xocdeproj"><a href="#指定xocdeproj" class="headerlink" title="指定xocdeproj"></a>指定xocdeproj</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">xcodeproj &apos;testProject&apos;</span><br><span class="line">target:test do</span><br><span class="line">  pod &apos;AFNetworking&apos;,&apos;3.2.0&apos;</span><br><span class="line">  xcodeproj &apos;otherProject&apos;   </span><br><span class="line"> end</span><br></pre></td></tr></table></figure>
+<h5 id="指定连接的target"><a href="#指定连接的target" class="headerlink" title="指定连接的target"></a>指定连接的target</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">target link_with &apos;MyApp&apos;,&apos;otherApp&apos; do</span><br><span class="line">  pod &apos;AFNetworking&apos;,&apos;3.2.0&apos;</span><br><span class="line"> end</span><br></pre></td></tr></table></figure>
+<h3 id="其他用法"><a href="#其他用法" class="headerlink" title="其他用法"></a>其他用法</h3><h5 id="抑制警告"><a href="#抑制警告" class="headerlink" title="抑制警告"></a>抑制警告</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">target &apos;MyApp&apos; do</span><br><span class="line"> pod &apos;AFNetworking&apos;,&apos;3.2.0&apos;,:inhibit_warnings =&gt; true 	//inhibit_warnings参数能够有效的抑制CocoaPods引入的第三方代码库产生的warning</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<h5 id="全局抑制警告"><a href="#全局抑制警告" class="headerlink" title="全局抑制警告"></a>全局抑制警告</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">platform :ios, &apos;8.0&apos;</span><br><span class="line">inhibit_all_warnings!</span><br><span class="line">target &apos;MyApp&apos; do</span><br><span class="line"> pod &apos;AFNetworking&apos;,&apos;3.2.0&apos;</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<h5 id="pod-install、pod-update、pod-repo-update-、-pod-install-–no-repo-update"><a href="#pod-install、pod-update、pod-repo-update-、-pod-install-–no-repo-update" class="headerlink" title="pod install、pod update、pod repo update 、 pod install –no-repo-update"></a>pod install、pod update、pod repo update 、 pod install –no-repo-update</h5><p>pod install：项目中添加或移除pod库时执行。</p>
+<p>pod update：更新pod库的版本时执行。</p>
+<p>pod repo update：更新整个.cocoapods下的所有库的配置文件,挨个检查对应的框架有没有新版本发布,有的话更新本地的资源配置文件。</p>
+<p>pod install –no-repo-update：根据<code>podfile</code>文件或者<code>podfile.lock</code>下载并导入对应的第三方库,跳过检查资源配置文件是否需要更新的环节。</p>
+<p>参考：<a href="https://blog.csdn.net/weixin_30808575/article/details/99457988" target="_blank" rel="noopener">https://blog.csdn.net/weixin_30808575/article/details/99457988</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="/2021/04/05/iOS性能优化-总结/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -290,6 +450,28 @@
             
           </span>
 
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS网文/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS网文</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -1857,158 +2039,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="/2019/06/19/千奇百怪的奔溃（一）/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="海文">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haven's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/19/千奇百怪的奔溃（一）/" itemprop="url">千奇百怪的奔溃（一）</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-19T16:24:53+08:00">
-                2019-06-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>App 上线后，我们最怕的应该就是异常奔溃了。常见的奔溃类型分两种：信号可捕获奔溃、信号不可捕获奔溃，前者比较典型的代表有<code>KVO</code>问题、<code>NSNotification</code>问题、数组越界、野指针等，后者比较典型的是后台任务超时、内存打爆、主线程卡顿超阀值等。</p>
-<p>那么怎样才能做到两种类型都能够加以监控？</p>
-<p>信号可捕获奔溃通常我们可以通过捕捉<code>Signal</code>异常来处理，先对各种类型的信号进行注册，捕获到异常后通过 <code>backtrace_symbols</code> 方法就可以获取当前的堆栈信息。堆栈信息可以先保存在本地，下次启动时再上传到奔溃监控服务器就可以了。新建一个<code>CrashHandler</code>类，信号可捕获奔溃实现代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">void handleSignalException(int signal) &#123;</span><br><span class="line">    NSMutableString *mstr = [[NSMutableString alloc] init];</span><br><span class="line">    [mstr appendString:@&quot;Stack:\n&quot;];</span><br><span class="line">    void* callstack[128];</span><br><span class="line">    int i, frames = backtrace(callstack, 128);</span><br><span class="line">    char** strs = backtrace_symbols(callstack, frames);</span><br><span class="line">    for (i = 0; i &lt; frames; ++i) &#123;</span><br><span class="line">        [mstr appendFormat:@&quot;%s\n&quot;, strs[i]];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    [CrashHandler saveCrash:mstr];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void registerSignalHandler(void) &#123;</span><br><span class="line">    signal(SIGHUP, handleSignalException);  //程序终端终止信号</span><br><span class="line">    signal(SIGINT, handleSignalException);  //程序键盘终止信号</span><br><span class="line">    //和SIGINT类似, 但由QUIT字符(通常是Ctrl-)来控制. 进程在因收到SIGQUIT退出时会产生core文件, 在这个意义上类似于一个程序错误信号。</span><br><span class="line">    signal(SIGQUIT, handleSignalException);</span><br><span class="line">    </span><br><span class="line">    signal(SIGABRT, handleSignalException); //程序终止命令终止信号</span><br><span class="line">    signal(SIGILL, handleSignalException);  //程序非法指令信号</span><br><span class="line">    signal(SIGSEGV, handleSignalException); //程序试图访问未分配给自己的内存, 或试图往没有写权限的内存地址写数据.</span><br><span class="line">    signal(SIGFPE, handleSignalException);  //在发生致命的算术运算错误时发出. 不仅包括浮点运算错误, 还包括溢出及除数为0等其它所有的算术的错误。</span><br><span class="line">    //非法地址, 包括内存地址对齐(alignment)出错。比如访问一个四个字长的整数, 但其地址不是4的倍数。它与SIGSEGV的区别在于后者是由于对合法存储地址的非法访问触发的(如访问不属于自己存储空间或只读存储空间)。</span><br><span class="line">    signal(SIGBUS, handleSignalException);</span><br><span class="line">    //管道破裂。这个信号通常在进程间通信产生，比如采用FIFO(管道)通信的两个进程，读管道没打开或者意外终止就往管道写，写进程会收到SIGPIPE信号。此外用Socket通信的两个进程，写进程在写Socket的时候，读进程已经终止。</span><br><span class="line">    signal(SIGPIPE, handleSignalException);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>信号不可捕获奔溃我们可以通过 <code>NSSetUncaughtExceptionHandler</code> 来做异常处理，我们要做的是先在 <code>APPDelegate</code> 中通过 <code>NSSetUncaughtExceptionHandler</code> 注册抓取函数，在函数内打印异常的堆栈信息、异常原因、异常名称，具体代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">void InstallUncaughtExceptionHandler(void) &#123;</span><br><span class="line">    NSSetUncaughtExceptionHandler(&amp;HandleException);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void HandleException(NSException *exception) &#123;</span><br><span class="line">    //异常的堆栈信息</span><br><span class="line">    NSArray *stackArray = [exception callStackSymbols];</span><br><span class="line">    //出现异常的原因</span><br><span class="line">    NSString *reason = [exception reason];</span><br><span class="line">    //异常名称</span><br><span class="line">    NSString *name = [exception name];</span><br><span class="line">    NSString *exceptionInfo = [NSString stringWithFormat:@&quot;Exception reason %@\nException name %@\nException stack %@&quot;, name, reason, stackArray];</span><br><span class="line">    </span><br><span class="line">    [CrashHandler saveCrash:exceptionInfo];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>saveCrash</code> 方法的具体代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line"> *  错误日志本地储存</span><br><span class="line"> *  TODO:错误堆栈信息可以先储存在本地，等下次启动时提交服务器</span><br><span class="line"> */</span><br><span class="line">+(void)saveCrash:(NSString *)exceptionInfo</span><br><span class="line">&#123;</span><br><span class="line">    NSString * _libPath  = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@&quot;Crash&quot;];</span><br><span class="line">    if (![[NSFileManager defaultManager] fileExistsAtPath:_libPath])&#123;</span><br><span class="line">        [[NSFileManager defaultManager] createDirectoryAtPath:_libPath withIntermediateDirectories:YES attributes:nil error:nil];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    NSDate *dat = [NSDate dateWithTimeIntervalSinceNow:0];</span><br><span class="line">    NSTimeInterval a = [dat timeIntervalSince1970];</span><br><span class="line">    NSString *timeString = [NSString stringWithFormat:@&quot;%f&quot;, a];</span><br><span class="line">    </span><br><span class="line">    NSString * savePath = [_libPath stringByAppendingFormat:@&quot;/error%@.log&quot;,timeString];</span><br><span class="line">    </span><br><span class="line">    NSLog(@&quot;__savePath %@&quot;, savePath);</span><br><span class="line">    </span><br><span class="line">    BOOL sucess = [exceptionInfo writeToFile:savePath atomically:YES encoding:NSUTF8StringEncoding error:nil];</span><br><span class="line">    </span><br><span class="line">    NSLog(@&quot;YES sucess:%d&quot;,sucess);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>只需要在<code>AppDelegate</code>的<code>application: didFinishLaunchingWithOptions:</code> 中对<code>registerSignalHandler()</code> 和 <code>InstallUncaughtExceptionHandler()</code> 进行注册，就可以对两种奔溃类型进行监控，监控到的异常日志可以通过<code>saveCrash</code>方法中的 <code>savePath</code> 拿到 <code>log</code> 路径并加以分析，完美点的做法也可以在App下次启东时将错误日志上传到奔溃日志服务器。</p>
-<p>详细的案例可以参考<a href="https://github.com/havendev/AnalyticsDemo" target="_blank" rel="noopener">AnalyticsDemo</a>中的<code>Demo-CrashViewController</code> 以及 <code>AppDelegate-applicationDidEnterBackground: -模拟后台奔溃</code>。</p>
-<p>错误日志分析可以参考<a href="https://developer.apple.com/videos/play/wwdc2018/414/" target="_blank" rel="noopener">WWDC-2018</a>的视频，讲得很好。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2059,7 +2089,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">15</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
